@@ -257,8 +257,7 @@ class MiCrawler {
 		if ($depth === 0) {
 			for($i = 1; $i <= $this->_settings['depth']; $i++) {
 				if (empty($this->_results[$i])) {
-					debug('stopping recursion at ' . $i); die;
-					break;
+					break (2);
 				}
 
 				$this->_logprefix($i);
