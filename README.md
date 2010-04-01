@@ -2,7 +2,11 @@
 
 A standalone php script for crawling a site.
 
-This script makes it relatively easy to find broken links, measure site response time for different pages, simulate real usage, amogst other things.
+This script makes it relatively easy to 
+ * find broken links
+ * find slow pages
+ * simulate semi-real usage (well, that's a stretch - but it's better than pinging the same page 20 times)
+ * Check any browser sniffing you might be doing
 
 ## Usage
 
