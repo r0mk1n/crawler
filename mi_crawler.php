@@ -257,7 +257,7 @@ class MiCrawler {
 		if ($depth === 0) {
 			for($i = 1; $i <= $this->_settings['depth']; $i++) {
 				if (empty($this->_results[$i])) {
-					break (2);
+					break;
 				}
 
 				$this->_logprefix($i);
