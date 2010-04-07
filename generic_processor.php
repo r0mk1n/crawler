@@ -8,6 +8,9 @@
  */
 class GenericProcessor {
 
+	public $settings = array(
+		'nl' => "\n";
+	);
 /**
  * process method
  *
@@ -72,7 +75,7 @@ class GenericProcessor {
  */
 	protected function log($message = null, $newLine = true) {
 		if ($newLine) {
-			echo "\n";
+			echo self::$settings['nl'];
 		}
 		echo $message;
 		flush();
