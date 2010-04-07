@@ -51,7 +51,8 @@ class MiCrawler {
 		'restricttodomainstrict' => false,
 		'loglevel' => 2,
 		'continue' => false,
-		'useragent' => 'MiCrawler Version 1.0'
+		'useragent' => 'MiCrawler Version 1.0',
+		'nl' => "\n",
 	);
 
 /**
@@ -529,7 +530,7 @@ class MiCrawler {
 		if ($messageLevel > $this->_settings['loglevel']) {
 			return;
 		}
-		$nl = $nl?"\n":'';
+		$nl = $nl?$this->_settings['nl']:'';
 		if ($prefix) {
 			echo implode($this->_settings['logPrefix'], ' » ') . $message . $nl;
 			return;
@@ -553,6 +554,6 @@ class MiCrawler {
 				echo ' ' . abs(round($end - $start, 4)) . 's';
 			}
 		}
-		echo "\n";
+		echo $this->_settings['nl'];
 	}
 }
