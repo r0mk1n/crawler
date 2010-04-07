@@ -9,7 +9,7 @@
 class GenericProcessor {
 
 	public $settings = array(
-		'nl' => "\n";
+		'nl' => "\n"
 	);
 /**
  * process method
