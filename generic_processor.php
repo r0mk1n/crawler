@@ -8,7 +8,7 @@
  */
 class GenericProcessor {
 
-	public $settings = array(
+	static public $settings = array(
 		'nl' => "\n"
 	);
 /**
