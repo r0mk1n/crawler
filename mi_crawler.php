@@ -49,6 +49,7 @@ class MiCrawler {
 		'domain' => '',
 		'restricttodomain' => true,
 		'restricttodomainstrict' => false,
+		'textlinks' => true,
 		'loglevel' => 2,
 		'continue' => false,
 		'useragent' => 'MiCrawler Version 1.0',
@@ -299,10 +300,10 @@ class MiCrawler {
 				return json_decode(file_get_contents($cacheFile), true);
 			}
 		}
-
 		preg_match_all($pattern, $text, $return);
-		if ($return[2]) {
-			$return = array_unique($return[2]);
+
+		if ($return[0]) {
+			$return = array_unique(array_pop($return));
 			sort($return);
 		} else {
 			$return = array();
@@ -350,14 +351,32 @@ class MiCrawler {
 	protected function _extractLinks($text) {
 		if ($this->_settings['restricttodomain']) {
 			if ($this->_settings['restricttodomainstrict']) {
-				$subPattern = '(?:' . preg_quote($this->_settings['domain'], '/') . '|)(\/';
+				$subPattern = '(?:' . preg_quote($this->_settings['domain'], '/') . '\/|)(\/';
 			} else {
-				$subPattern = '((?:https?\:\/\/[0-9a-zA-Z_\.]*' . preg_quote(preg_replace('@^.*\:\/\/@', '', $this->_settings['domain'])) . '|\/)';
+				$subPattern = '((?:https?\:\/\/[0-9a-zA-Z_\.]*' . preg_quote(preg_replace('@^.*\:\/\/@', '', $this->_settings['domain'])) . '|)';
 			}
-			$links = $this->_extract($text, '/<a[^>]*href\s*=\s*(["\'])?' . $subPattern . '[^># ]+)[^> ]*\1/i', false);
+			$links = $this->_extract($text, '/<a[^>]*href\s*=\s*(["\'])?' . $subPattern . '[^<># ]+)[^> ]*\1/i', false);
 		} else {
-			$links = $this->_extract($text, '/<a[^>]*href\s*=\s*(["\'])?([http.*?|\/][^># ]+)[^> ]*\1/i', false);
+			$links = $this->_extract($text, '/<a[^>]*href\s*=\s*(["\'])?([http.*?|\/][^># ]+)[^<> ]*\1/i', false);
 		}
+		if ($this->_settings['textlinks']) {
+			if ($this->_settings['restricttodomain']) {
+				if ($this->_settings['restricttodomainstrict']) {
+					$subPattern = '(?:' . preg_quote($this->_settings['domain'], '/') . ')(\/';
+				} else {
+					$subPattern = '(https?\:\/\/[0-9a-zA-Z_\.]*' . preg_quote(preg_replace('@^.*\:\/\/@', '', $this->_settings['domain']));
+				}
+				$pattern = '/' . $subPattern . '[^<># "\']*)/i';
+			} else {
+				$pattern = '/(https?:\/\/[^<># "\']*)/i';
+			}
+
+			$llinks = $this->_extract($text, $pattern, false);
+			if ($llinks) {
+				$links = array_unique(array_merge($links, $llinks));
+			}
+		}
+		$links = array_unique(array_map(array('MiCrawler', '_uniqueUrl'), $links));
 		return $links;
 	}
 
@@ -489,6 +508,24 @@ class MiCrawler {
  */
 	protected function _tmpFile($url) {
 		return $this->_settings['pagesTmpDir'] . md5($url);
+	}
+
+/**
+ * Normalize urls to prevent requesting the same url twice.
+ * 	Strips trailing slashes
+ * 	replaces &amp; with &
+ *
+ * The latter is because it's shorter to store/work with.
+ *
+ * @TODO - get params remove them, inlcude them, ignore them?
+ * @see MiCrawler::_extractLinks
+ * @param mixed $url
+ * @return void
+ * @access protected
+ */
+	protected function _uniqueUrl($url) {
+		$url = str_replace('&amp;', '&', $url);
+		return rtrim($url, '/');
 	}
 
 /**
