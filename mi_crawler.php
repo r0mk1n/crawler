@@ -172,15 +172,16 @@ class MiCrawler {
 			if ($this->_settings['domain'] === trim($url, '/')) {
 				$url = '/';
 			}
+			$this->_settings['_globalDomain'] = preg_replace('@^https?:\/\/(www\.)?@', '', $this->_settings['domain']); 
 		}
 
 		$base = dirname(__FILE__) . '/';
 		if ($this->_settings['dataTmpDir'][0] !== '/') {
-			$this->_settings['dataTmpDir'] = $base . $this->_settings['dataTmpDir'] . $parts['host'] . '/';
+			$this->_settings['dataTmpDir'] = $base . $this->_settings['dataTmpDir'];
 		}
 
 		if ($this->_settings['pagesTmpDir'][0] !== '/') {
-			$this->_settings['pagesTmpDir'] = $base . $this->_settings['pagesTmpDir'] . $parts['host'] . '/';
+			$this->_settings['pagesTmpDir'] = $base . $this->_settings['pagesTmpDir'];
 		}
 
 		if (isset($this->_settings['useragents'][strtolower($this->_settings['useragent'])])) {
@@ -201,7 +202,7 @@ class MiCrawler {
 		$fullUrl = $url;
 
 		if ($this->_settings['cache'] && $depth === 0) {
-			$cacheFile = dirname($this->_settings['pagesTmpDir']) . '/' . basename($this->_settings['pagesTmpDir']) . '.json';
+			$cacheFile = dirname($this->_settings['pagesTmpDir']) . '/' . $this->_settings['_globalDomain'] . '.json';
 			if (file_exists($cacheFile)) {
 				$this->_map = json_decode(file_get_contents($cacheFile), true);
 				if (!$continue) {
@@ -211,17 +212,16 @@ class MiCrawler {
 		}
 
 		if ($this->_settings['domain'] === trim($url, '/')) {
-				$url = '/';
+				$url = $this->_settings['domain'];
 		} elseif ($url[0] === '/') {
 			$fullUrl = $this->_settings['domain'] . $url;
 		}
-
 
 		$this->_logprefix($url);
 
 		$directResults = $this->_index($fullUrl);
 
-		if ($depth < $this->_settings['depth']) {
+		if (!$this->_settings['depth'] || $depth < $this->_settings['depth']) {
 			if (empty($this->_results[$depth + 1])) {
 				$this->_results[$depth + 1] = (array)$directResults;
 			} else {
@@ -231,7 +231,11 @@ class MiCrawler {
 		}
 
 		if ($depth === 0) {
-			for($i = 1; $i <= $this->_settings['depth']; $i++) {
+			$max = $this->_settings['depth'];
+			if (!$max) {
+				$max = 999;
+			}
+			for($i = 1; $i <= $max; $i++) {
 				if (empty($this->_results[$i])) {
 					break;
 				}
@@ -278,7 +282,8 @@ class MiCrawler {
 		if ($contents === false) {
 			return false;
 		}
-		$links = $this->_extractLinks($contents);
+		$parts = parse_url($url);
+		$links = $this->_extractLinks($contents, $parts['scheme'] . '://' . $parts['host']);
 		if ($paginate) {
 			$links = array_merge($links, $this->_paginate($url, $contents, $links));
 		}
@@ -294,7 +299,7 @@ class MiCrawler {
  * @access protected
  */
 	protected function _extract($text, $pattern = '//') {
-		if ($this->_settings['cache']) {
+		if (false && $this->_settings['cache']) {
 			$cacheFile = $this->_settings['dataTmpDir'] . md5($pattern . $text);
 			if (file_exists($cacheFile)) {
 				return json_decode(file_get_contents($cacheFile), true);
@@ -309,7 +314,7 @@ class MiCrawler {
 			$return = array();
 		}
 
-		if ($this->_settings['cache']) {
+		if ($this->_settings['cache'] && !empty($cacheFile)) {
 			$dir = dirname($cacheFile);
 			if (!is_dir($dir)) {
 				`mkdir -p $dir`;
@@ -348,12 +353,13 @@ class MiCrawler {
  * @return void
  * @access protected
  */
-	protected function _extractLinks($text) {
+	protected function _extractLinks($text, $domain) {
+		$this->_currentDomain = $domain;
 		if ($this->_settings['restricttodomain']) {
 			if ($this->_settings['restricttodomainstrict']) {
-				$subPattern = '(?:' . preg_quote($this->_settings['domain'], '/') . '\/|)(\/';
+				$subPattern = '(?:' . preg_quote($this->_settings['domain'], '/') . '|)(\/';
 			} else {
-				$subPattern = '((?:https?\:\/\/[0-9a-zA-Z_\.]*' . preg_quote(preg_replace('@^.*\:\/\/@', '', $this->_settings['domain'])) . '|)';
+				$subPattern = '(?:https?\:\/\/[0-9a-zA-Z_\.]*' . preg_quote($this->_settings['_globalDomain']) . '|)(\/';
 			}
 			$links = $this->_extract($text, '/<a[^>]*href\s*=\s*(["\'])?' . $subPattern . '[^<># ]+)[^> ]*\1/i', false);
 		} else {
@@ -362,9 +368,9 @@ class MiCrawler {
 		if ($this->_settings['textlinks']) {
 			if ($this->_settings['restricttodomain']) {
 				if ($this->_settings['restricttodomainstrict']) {
-					$subPattern = '(?:' . preg_quote($this->_settings['domain'], '/') . ')(\/';
+					$subPattern = '(' . preg_quote($this->_settings['domain'], '/') . '\/';
 				} else {
-					$subPattern = '(https?\:\/\/[0-9a-zA-Z_\.]*' . preg_quote(preg_replace('@^.*\:\/\/@', '', $this->_settings['domain']));
+					$subPattern = '(https?\:\/\/[0-9a-zA-Z_\.]*' . preg_quote($this->_settings['_globalDomain']) . '\/';
 				}
 				$pattern = '/' . $subPattern . '[^<># "\']*)/i';
 			} else {
@@ -402,7 +408,8 @@ class MiCrawler {
 
 		$base = preg_replace('@https?://[^/]*@', '', $url);
 		if (!$links) {
-			$links = $this->_extractLinks($contents);
+			$parts = parse_url($url);
+			$links = $this->_extractLinks($contents, $parts['scheme'] . '://' . $parts['host']);
 		}
 
 		$pages = array();
@@ -447,8 +454,8 @@ class MiCrawler {
 		static $realCounter = 0;
 
 		$this->_log(' (' . $counter++ . ')', 0, true, false);
-		$cacheFile = $this->_tmpFile($url);
 		if ($this->_settings['cache']) {
+			$cacheFile = $this->_tmpFile($url);
 			$this->_map[$url] = $cacheFile;
 			if (file_exists($cacheFile)) {
 				$this->_logTime(0, 0);
@@ -507,7 +514,8 @@ class MiCrawler {
  * @access protected
  */
 	protected function _tmpFile($url) {
-		return $this->_settings['pagesTmpDir'] . md5($url);
+		$parts = parse_url($url);
+		return $this->_settings['pagesTmpDir'] . $parts['host'] . '/' . md5($url);
 	}
 
 /**
@@ -525,7 +533,13 @@ class MiCrawler {
  */
 	protected function _uniqueUrl($url) {
 		$url = str_replace('&amp;', '&', $url);
-		return rtrim($url, '/');
+		if ($url !== '/') {
+			$url = rtrim($url, '/');
+		}
+		if (empty($url) || $url[0] === '/') {
+			$url = $this->_currentDomain . $url;
+		}
+		return $url;
 	}
 
 /**

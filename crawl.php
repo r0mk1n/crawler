@@ -14,7 +14,7 @@ analysis
 
 arguments:
 -cache                  Use cached results if they exist? Defaults to true
--depth                  How deep to follow the links. Defaults to 2
+-depth                  How deep to follow the links. Defaults to 2, set to 0 to disable
 -limit                  Maximum number of pages to request - defaults to no limit
 -restricttodomain       Don't leave the domain? Defaults to true
 -restricttodomainstrict Don't consider subdomains part of the domain? Defaults to false
