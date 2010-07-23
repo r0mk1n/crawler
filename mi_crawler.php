@@ -300,7 +300,7 @@ class MiCrawler {
  * @access protected
  */
 	protected function _extract($text, $pattern = '//') {
-		if (false && $this->_settings['cache']) {
+		if ($this->_settings['cache']) {
 			$cacheFile = $this->_settings['dataTmpDir'] . md5($pattern . $text);
 			if (file_exists($cacheFile)) {
 				return json_decode(file_get_contents($cacheFile), true);
