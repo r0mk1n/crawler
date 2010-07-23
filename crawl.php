@@ -61,6 +61,9 @@ function parseParams ($params = array()) {
 
 function crawl($uri, $params = array(), $processor = '', $processorFile = '') {
 	$params = array_merge(array('continue' => false), $params);
+	if (!strpos($uri, '://')) {
+		$uri = 'http://' . $uri;
+	}
 	$results = MiCrawler::crawl($uri, $params);
 	if ($results && $processorFile && is_file(dirname(__FILE__) . '/' . $processorFile)) {
 		require_once(dirname(__FILE__) . '/' . $processorFile);
@@ -83,9 +86,13 @@ if ($function === 'crawl.php') {
 	$processor = $processorFile = null;
 
 	$uri = $params[0];
+	if (!strpos($uri, '://')) {
+		$uri = 'http://' . $uri;
+	}
+
 	extract($params);
-	$parts = parse_url($uri);
 	if (!$processor) {
+		$parts = parse_url($uri);
 		$processor = strtolower(str_replace(array('www.', '.com'), '', $parts['host']));
 		$processorFile = $processor . '_processor.php';
 		if (!file_exists(dirname(__FILE__) . '/' . $processor . '_processor.php')) {
