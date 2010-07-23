@@ -45,6 +45,7 @@ class MiCrawler {
 
 		'cache' => true,
 		'depth' => 2,
+		'exclude' => '(/css/|/js/)',
 		'limit' => 0,
 		'domain' => '',
 		'restricttodomain' => true,
@@ -324,6 +325,14 @@ class MiCrawler {
 		return $return;
 	}
 
+	protected function _exclude($url) {
+		static $pattern;
+		if (!$pattern) {
+			$pattern = $this->_settings['exclude'];
+		}
+		return !preg_match('@' . $this->_settings['exclude'] . '@', $url);
+	}
+
 /**
  * filter method
  *
@@ -383,6 +392,7 @@ class MiCrawler {
 			}
 		}
 		$links = array_unique(array_map(array('MiCrawler', '_uniqueUrl'), $links));
+		$links = array_filter($links, array('MiCrawler', '_exclude'));
 		return $links;
 	}
 
