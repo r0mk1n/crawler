@@ -615,6 +615,8 @@ class MiCrawler {
 				echo ' ' . abs(round($end - $start, 4)) . 's';
 			}
 		}
-		echo $this->_settings['nl'];
+		if ($this->_settings['loglevel'] > -1) {
+			echo $this->_settings['nl'];
+		}
 	}
 }
