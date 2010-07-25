@@ -264,6 +264,7 @@ class MiCrawler {
 				$this->_map[$url] = $cacheFile;
 			}
 			ksort($this->_map);
+			file_put_contents($cacheFile, json_encode($this->_map));
 			return $this->_map;
 		}
 		$this->_logPrefixPop();
