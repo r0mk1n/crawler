@@ -465,8 +465,8 @@ class MiCrawler {
 		static $realCounter = 0;
 
 		$this->_log(' (' . $counter++ . ')', 0, true, false);
+		$cacheFile = $this->_tmpFile($url);
 		if ($this->_settings['cache']) {
-			$cacheFile = $this->_tmpFile($url);
 			$this->_map[$url] = $cacheFile;
 			if (file_exists($cacheFile)) {
 				$this->_logTime(0, 0);
@@ -594,10 +594,16 @@ class MiCrawler {
 		}
 		$nl = $nl?$this->_settings['nl']:'';
 		if ($prefix) {
-			echo implode($this->_settings['logPrefix'], ' » ') . $message . $nl;
+			if (!empty($this->_settings['logPrefix'])) {
+				echo implode($this->_settings['logPrefix'], ' » ');
+			}
+			echo $message . $nl;
 			return;
 		}
-		echo str_repeat("\t", count($this->_settings['logPrefix']) - 1) . $message . $nl;
+		if (!empty($this->_settings['logPrefix'])) {
+			echo str_repeat("\t", count($this->_settings['logPrefix']) - 1);
+		}
+		echo $message . $nl;
 	}
 
 /**
