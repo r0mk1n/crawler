@@ -1,16 +1,24 @@
 <?php
-if (!function_exists('getMicrotime')) {
 /**
- * getMicrotime method
+ * Short description for mi_crawler.php
  *
- * @return void
- * @access public
+ * Long description for mi_crawler.php
+ *
+ * PHP version 4 and 5
+ *
+ * Copyright (c) 2010, YourNameOrCompany
+ *
+ * Licensed under The MIT License
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @filesource
+ * @copyright     Copyright (c) 2010, YourNameOrCompany
+ * @link          www.yoursite.com
+ * @package       crawler
+ * @subpackage    crawler
+ * @since         v 1.0 (05-Aug-2010)
+ * @license       http://www.opensource.org/licenses/mit-license.php The MIT License
  */
-	function getMicrotime() {
-		list($usec, $sec) = explode(' ', microtime());
-		return ((float)$usec + (float)$sec);
-	}
-}
 
 /**
  * MiCrawler class
@@ -173,7 +181,7 @@ class MiCrawler {
 			if ($this->_settings['domain'] === trim($url, '/')) {
 				$url = '/';
 			}
-			$this->_settings['_globalDomain'] = preg_replace('@^https?:\/\/(www\.)?@', '', $this->_settings['domain']); 
+			$this->_settings['_globalDomain'] = preg_replace('@^https?:\/\/(www\.)?@', '', $this->_settings['domain']);
 		}
 
 		$base = dirname(__FILE__) . '/';
@@ -326,6 +334,13 @@ class MiCrawler {
 		return $return;
 	}
 
+/**
+ * exclude method
+ *
+ * @param mixed $url
+ * @return void
+ * @access protected
+ */
 	protected function _exclude($url) {
 		static $pattern;
 		if (!$pattern) {
@@ -483,7 +498,7 @@ class MiCrawler {
 
 		$realCounter++;
 
-		$start = getMicrotime();
+		$start = microtime(true);
 		$ch = curl_init();
 
 		curl_setopt_array($ch, array(
@@ -499,7 +514,7 @@ class MiCrawler {
 		));
 
 		$contents = curl_exec($ch);
-		$this->_logTime($start, getMicrotime());
+		$this->_logTime($start, microtime(true));
 		$info = curl_getinfo($ch);
 
 		if ($info['http_code'] != 200 && $info['http_code'] > 302) {
