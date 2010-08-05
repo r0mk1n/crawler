@@ -505,7 +505,7 @@ class MiCrawler {
 				$diff = $now - $lastRequest + $this->_settings['wait'];
 				if ($diff > 0) {
 					$diff = round($diff);
-					$this->_log("Sleeping for $diff seconds", 2);
+					$this->_log("Sleeping for $diff seconds", 2, false, false);
 					sleep($diff);
 				}
 			}
