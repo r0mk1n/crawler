@@ -55,6 +55,7 @@ class MiCrawler {
 		'depth' => 2,
 		'exclude' => '(/css/|/js/)',
 		'limit' => 0,
+		'wait' => 0,
 		'domain' => '',
 		'restricttodomain' => true,
 		'restricttodomainstrict' => false,
@@ -479,6 +480,8 @@ class MiCrawler {
 
 		static $realCounter = 0;
 
+		static $lastRequest = null;
+
 		$this->_log(' (' . $counter++ . ')', 0, true, false);
 		$cacheFile = $this->_tmpFile($url);
 		if ($this->_settings['cache']) {
@@ -494,6 +497,18 @@ class MiCrawler {
 		if ($this->_settings['limit'] && $realCounter > $this->_settings['limit']) {
 			$this->_log("Retrieval limit reached");
 			return false;
+		}
+
+		if ($this->_settings['wait']) {
+			$now = microtime(true);
+			if ($lastRequest) {
+				$diff = $now - $lastRequest + $this->_settings['wait'];
+				if ($diff > 0) {
+					$diff = round($diff);
+					$this->_log("Sleeping for $diff seconds", 2);
+					sleep($diff);
+				}
+			}
 		}
 
 		$realCounter++;
@@ -516,6 +531,7 @@ class MiCrawler {
 		$contents = curl_exec($ch);
 		$this->_logTime($start, microtime(true));
 		$info = curl_getinfo($ch);
+		$lastRequest = microtime(true);
 
 		if ($info['http_code'] != 200 && $info['http_code'] > 302) {
 			$this->_log("page not found, code " . $info['http_code'], 1);

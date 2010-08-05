@@ -33,6 +33,7 @@ arguments:
 -processor              The name of the processor class to run results through.
                             Defaults to the (normalized) name of the domain
                             If the class doesn't exist it only crawls
+-wait                   How many seconds to wait inbetween requests. Defaults to 0
 <?php
 }
 
