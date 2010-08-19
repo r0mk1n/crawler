@@ -101,6 +101,8 @@ if ($function === 'crawl.php') {
 			$processor = 'Generic';
 			$processorFile = 'generic_processor.php';
 		}
+	} elseif (!$processorFile) {
+		$processorFile = $processor . '_processor.php';
 	}
 	crawl($uri, $params, $processor, $processorFile);
 }

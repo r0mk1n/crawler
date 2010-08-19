@@ -19,6 +19,37 @@
  * @since         v 1.0 (05-Aug-2010)
  * @license       http://www.opensource.org/licenses/mit-license.php The MIT License
  */
+if (!function_exists('trace')) {
+/**
+ * Generate a stack trace of how you got here
+ *
+ * @return void
+ * @access public
+ */
+	function trace() {
+		$backtrace = debug_backtrace();
+		array_shift($backtrace);
+		$return = array();
+		foreach($backtrace as $i => $row) {
+			$row = array_merge(array('file' => '[internal]', 'line' => '??'), $row);
+			$row['file'] = str_replace(ABSPATH, '', $row['file']);
+			if ($row['function'] === 'call_user_func_array') {
+				$return[$i - 1] = str_replace('[internal]:??', "{$row['file']}:{$row['line']}", $return[$i - 1]);
+				continue;
+			}
+			$ref = '';
+			if (!empty($row['class'])) {
+				$ref .= "{$row['class']}::";
+			}
+			if (!empty($row['function'])) {
+				$ref .= $row['function'] . ' ';
+			}
+			$ref .= "{$row['file']}:{$row['line']}";
+			$return[$i] = $ref;
+		}
+		return implode("\n", $return);
+	}
+}
 
 /**
  * MiCrawler class
