@@ -86,6 +86,8 @@ class MiCrawler {
 		'depth' => 2,
 		'exclude' => '(/css/|/js/)',
 		'limit' => 0,
+		'no-parent' => false,
+		'parentDir' => false,
 		'wait' => 0,
 		'domain' => '',
 		'restricttodomain' => true,
@@ -214,6 +216,13 @@ class MiCrawler {
 				$url = '/';
 			}
 			$this->_settings['_globalDomain'] = preg_replace('@^https?:\/\/(www\.)?@', '', $this->_settings['domain']);
+		}
+		if ($url !== '/') {
+			if (substr($url, -1) == '/') {
+				$this->_settings['parentDir'] = $url;
+			} else {
+				$this->_settings['parentDir'] = preg_replace('@/[^/]*?$@', '', $url);
+			}
 		}
 
 		$base = dirname(__FILE__) . '/';
@@ -377,6 +386,12 @@ class MiCrawler {
 		static $pattern;
 		if (!$pattern) {
 			$pattern = $this->_settings['exclude'];
+		}
+
+		if ($this->_settings['parentDir']) {
+			if (strpos($url, $this->_settings['parentDir']) === false) {
+				return false;
+			}
 		}
 		return !preg_match('@' . $this->_settings['exclude'] . '@', $url);
 	}
@@ -588,7 +603,18 @@ class MiCrawler {
  */
 	protected function _tmpFile($url) {
 		$parts = parse_url($url);
-		return $this->_settings['pagesTmpDir'] . $parts['host'] . '/' . md5($url);
+		$hash = md5($url);
+		$return = $this->_settings['pagesTmpDir'] . $parts['host'] . '/' . $hash[0] . '/' . $hash[1] . '/' . $hash;
+
+		/* temporary */
+		$old = $this->_settings['pagesTmpDir'] . $parts['host'] . '/' . $hash;
+		if (file_exists($old)) {
+			$dir = dirname($return);
+			`mkdir -p $dir`;
+			`mv $old $return`;
+		}
+		/* temporary end */
+		return $return;
 	}
 
 /**

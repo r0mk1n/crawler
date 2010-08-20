@@ -19,6 +19,7 @@ arguments:
 -limit                  Maximum number of pages to request - defaults to no limit
 -restricttodomain       Don't leave the domain? Defaults to true
 -restricttodomainstrict Don't consider subdomains part of the domain? Defaults to false
+-no-parent              Don't go above the start url - defaults to true
 -loglevel               How verbose/informative to be. Defaults to 2
 -continue               Continue from where you left off? Defaults to false
                             If true and an index from a previous crawl is found no
