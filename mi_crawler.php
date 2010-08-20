@@ -253,7 +253,7 @@ class MiCrawler {
 
 		if ($this->_settings['cache'] && $depth === 0) {
 			$cacheFile = dirname($this->_settings['pagesTmpDir']) . '/' . $this->_settings['_globalDomain'] . '.json';
-			if (file_exists($cacheFile)) {
+			if (file_exists($cacheFile) && filesize($cacheFile) < 1000000) {
 				$this->_map = json_decode(file_get_contents($cacheFile), true);
 				if (!$continue) {
 					return $this->_map;
