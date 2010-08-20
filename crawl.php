@@ -1,6 +1,6 @@
 #!/usr/bin/php -q
 <?php
-include(dirname(__FILE__) . '/mi_crawler.php');
+include dirname(__FILE__) . '/mi_crawler.php';
 
 function crawlHelp() {
 ?>
@@ -69,7 +69,7 @@ function crawl($uri, $params = array(), $processor = '', $processorFile = '') {
 	}
 	$results = MiCrawler::crawl($uri, $params);
 	if ($results && $processorFile && is_file(dirname(__FILE__) . '/' . $processorFile)) {
-		require_once(dirname(__FILE__) . '/' . $processorFile);
+		require_once dirname(__FILE__) . '/' . $processorFile;
 		$processor = ucwords($processor) . 'Processor';
 		$results = call_user_func_array(array($processor, 'process'), array($results, $uri));
 		echo "\n";
