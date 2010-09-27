@@ -67,8 +67,8 @@ class MiCrawler {
  * @access public
  */
 	public static $settings = array(
-		'pagesTmpDir' => 'tmp/pages/',
-		'dataTmpDir' => 'tmp/data/',
+		'pagesTmpDir' => '/tmp/crawler/pages/',
+		'dataTmpDir' => '/tmp/crawler/data/',
 		'logPrefix' => '',
 		'useragents' => array(
 			'android' => 'Mozilla/5.0 (Linux; U; Android 2.1; en-us; Nexus One Build/ERD62) AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0 Mobile Safari/530.17 ',
